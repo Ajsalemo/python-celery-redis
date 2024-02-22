@@ -3,6 +3,8 @@ from celery import shared_task
 from config import celery_init_app
 
 from random import randrange
+from datetime import datetime
+
 
 app = Flask(__name__)
 
@@ -20,10 +22,22 @@ app.config.from_mapping(
 
 celery_app = celery_init_app(app)
 
+# Set up get_current_datetime() to run every 30 seconds
+@celery_app.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    sender.add_periodic_task(30.0, get_current_datetime.s(), name='get-date-and-time-ever-30-seconds')
+
 
 @shared_task(ignore_result=False)
 def add_together(a: int, b: int) -> int:
     return a + b
+
+
+@shared_task(ignore_result=False)
+def get_current_datetime() -> str:
+    print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
+    return datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+
 
 @app.get("/task/add")
 def start_add() -> dict[str, object]:
