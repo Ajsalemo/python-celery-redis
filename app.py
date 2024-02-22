@@ -13,6 +13,8 @@ app.config.from_mapping(
         broker_url="redis://redis-service:6379",
         result_backend="redis://redis-service:6379",
         task_ignore_result=True,
+        # https://docs.celeryq.dev/en/stable/userguide/configuration.html#broker-connection-retry-on-startup
+        broker_connection_retry_on_startup=True,
     ),
 )
 
