@@ -1,5 +1,6 @@
 from flask import Flask
 from celery import shared_task
+from celery.result import AsyncResult
 from config import celery_init_app
 
 from random import randrange
@@ -45,3 +46,13 @@ def start_add() -> dict[str, object]:
     b = randrange(20)
     result = add_together.delay(a, b)
     return {"result_id": result.id}
+
+
+@app.get("/task/result/<id>")
+def task_result(id: str) -> dict[str, object]:
+    result = AsyncResult(id)
+    return {
+        "ready": result.ready(),
+        "successful": result.successful(),
+        "value": result.result if result.ready() else None,
+    }
