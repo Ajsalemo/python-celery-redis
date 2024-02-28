@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from celery import shared_task
 from celery.result import AsyncResult
 from config import celery_init_app
@@ -13,8 +13,8 @@ app = Flask(__name__)
 # Redis port: 6380 is SSL
 app.config.from_mapping(
     CELERY=dict(
-        broker_url="redis://redis-service:6379",
-        result_backend="redis://redis-service:6379",
+        broker_url="redis://localhost:6379",
+        result_backend="redis://localhost:6379",
         task_ignore_result=True,
         # https://docs.celeryq.dev/en/stable/userguide/configuration.html#broker-connection-retry-on-startup
         broker_connection_retry_on_startup=True,
@@ -40,6 +40,11 @@ def get_current_datetime() -> str:
     return datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
 
+@app.get("/")
+def index():
+    return jsonify({ "msg": "python-celery-redis" })
+
+
 @app.get("/task/add")
 def start_add() -> dict[str, object]:
     a = randrange(10)
@@ -56,3 +61,5 @@ def task_result(id: str) -> dict[str, object]:
         "successful": result.successful(),
         "value": result.result if result.ready() else None,
     }
+
+
