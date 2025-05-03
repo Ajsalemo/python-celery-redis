@@ -1,0 +1,17 @@
+services:
+  web:
+    image: pythonceleryredis:latest
+    container_name: pythonceleryredis
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - REDIS_HOST=redis
+    ports:
+      - "8000:8000"
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
